@@ -3,10 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/constants/theme_constants.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/domain/app_logger.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/state/provider_view_state.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/di/injector.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/models/products_response_model/product.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/product/presentation/state/product_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/helpers/product_data_guard.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/empty_state_widget.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/error_state_widget.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/initial_state_widget.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/loading_state_widget.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key, required this.productId});
@@ -164,27 +169,7 @@ class _ProductPageState extends State<ProductPage> {
                             ),
                           ),
                           const SizedBox(height: 18),
-                          if (provider.isLoading && product == null)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 80),
-                              child: Center(child: CircularProgressIndicator()),
-                            )
-                          else if (provider.errorMessage != null &&
-                              product == null)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(provider.errorMessage!),
-                                const SizedBox(height: 12),
-                                ElevatedButton(
-                                  onPressed: () =>
-                                      provider.loadProduct(widget.productId),
-                                  child: const Text('Retry'),
-                                ),
-                              ],
-                            )
-                          else if (product != null)
-                            _DetailsContent(product: product),
+                          _buildSheetContent(provider),
                         ],
                       ),
                     ),
@@ -214,6 +199,36 @@ class _ProductPageState extends State<ProductPage> {
     }
 
     return <String>[];
+  }
+
+  Widget _buildSheetContent(ProductProvider provider) {
+    switch (provider.state) {
+      case ProviderViewState.initial:
+        return const InitialStateWidget(message: 'Preparing product...');
+      case ProviderViewState.loading:
+        return const LoadingStateWidget(message: 'Loading product...');
+      case ProviderViewState.error:
+        return ErrorStateWidget(
+          message: provider.errorMessage ?? 'Failed to load product.',
+          onRetry: () => provider.loadProduct(widget.productId),
+        );
+      case ProviderViewState.empty:
+        return EmptyStateWidget(
+          message: 'No product details available.',
+          actionLabel: 'Retry',
+          onAction: () => provider.loadProduct(widget.productId),
+        );
+      case ProviderViewState.loaded:
+        final product = provider.product;
+        if (product == null) {
+          return EmptyStateWidget(
+            message: 'No product details available.',
+            actionLabel: 'Retry',
+            onAction: () => provider.loadProduct(widget.productId),
+          );
+        }
+        return _DetailsContent(product: product);
+    }
   }
 }
 

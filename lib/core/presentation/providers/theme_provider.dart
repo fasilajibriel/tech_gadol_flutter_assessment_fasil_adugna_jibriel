@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/constants/storage_constants.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/domain/local_storage_manager.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/error/failure_extensions.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/state/provider_view_state.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/theme/app_theme.dart';
 
 class ThemeProvider extends ChangeNotifier {
   final LocalStorageManager _localStorageManager;
   ThemeMode _themeMode = ThemeMode.system;
+  ProviderViewState _state = ProviderViewState.initial;
+  String? _errorMessage;
 
   ThemeMode get themeMode => _themeMode;
+  ProviderViewState get state => _state;
+  String? get errorMessage => _errorMessage;
 
   ThemeData get currentTheme {
     switch (_themeMode) {
@@ -26,6 +32,10 @@ class ThemeProvider extends ChangeNotifier {
 
   /// Initialize the theme from storage or system settings
   Future<void> initialize() async {
+    _state = ProviderViewState.loading;
+    _errorMessage = null;
+    notifyListeners();
+
     // Try to load saved theme from storage
     final result = await _localStorageManager.readString(
       StorageConstants.themeModeKey,
@@ -35,6 +45,8 @@ class ThemeProvider extends ChangeNotifier {
       (failure) {
         // If reading from storage fails, use system theme
         _themeMode = ThemeMode.system;
+        _errorMessage = failure.userMessage;
+        _state = ProviderViewState.error;
       },
       (savedTheme) {
         if (savedTheme.isNotEmpty) {
@@ -51,9 +63,11 @@ class ThemeProvider extends ChangeNotifier {
               _themeMode = ThemeMode.system;
               break;
           }
+          _state = ProviderViewState.loaded;
         } else {
           // If no theme is saved, use system theme
           _themeMode = ThemeMode.system;
+          _state = ProviderViewState.empty;
         }
       },
     );
@@ -63,15 +77,27 @@ class ThemeProvider extends ChangeNotifier {
 
   /// Sets the theme mode and saves it to storage
   Future<void> setThemeMode(ThemeMode mode) async {
+    _state = ProviderViewState.loading;
     _themeMode = mode;
     notifyListeners();
 
     // Save theme mode to storage
     final themeString = _themeModeToString(mode);
-    await _localStorageManager.writeString(
+    final result = await _localStorageManager.writeString(
       StorageConstants.themeModeKey,
       themeString,
     );
+    result.fold(
+      (failure) {
+        _errorMessage = failure.userMessage;
+        _state = ProviderViewState.error;
+      },
+      (_) {
+        _errorMessage = null;
+        _state = ProviderViewState.loaded;
+      },
+    );
+    notifyListeners();
   }
 
   /// Toggles between light and dark modes

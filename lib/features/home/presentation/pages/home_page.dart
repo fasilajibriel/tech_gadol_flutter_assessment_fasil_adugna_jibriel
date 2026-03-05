@@ -3,8 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/app/routes.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/providers/theme_provider.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/state/provider_view_state.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/models/products_response_model/product.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/presentation/state/home_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/category_chip.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/empty_state_widget.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/error_state_widget.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/initial_state_widget.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/loading_state_widget.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/product_card.dart';
 
 class HomePage extends StatefulWidget {
@@ -114,114 +120,151 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: 48,
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: provider.categories.length + 1,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return CategoryChip(
-                        label: HomeProvider.allCategory,
-                        isSelected:
-                            provider.selectedCategorySlug ==
-                            HomeProvider.allCategory,
-                        onTap: () => provider.setSelectedCategory(
-                          HomeProvider.allCategory,
-                        ),
-                      );
-                    }
-
-                    final category = provider.categories[index - 1];
-                    final categorySlug = category.slug ?? category.name ?? '';
-                    final categoryName = category.name ?? categorySlug;
-
-                    return CategoryChip(
-                      label: categoryName,
-                      isSelected: provider.selectedCategorySlug == categorySlug,
-                      onTap: () => provider.setSelectedCategory(categorySlug),
-                    );
-                  },
-                ),
-              ),
+              _buildCategorySection(provider),
               const SizedBox(height: 8),
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: provider.refreshProducts,
-                  child: Builder(
-                    builder: (context) {
-                      if (provider.isLoading && filteredProducts.isEmpty) {
-                        return ListView(
-                          controller: _scrollController,
-                          children: const [
-                            SizedBox(height: 120),
-                            Center(child: CircularProgressIndicator()),
-                          ],
-                        );
-                      }
-
-                      if (provider.errorMessage != null &&
-                          filteredProducts.isEmpty) {
-                        return ListView(
-                          controller: _scrollController,
-                          children: [
-                            const SizedBox(height: 120),
-                            Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(provider.errorMessage!),
-                                  const SizedBox(height: 12),
-                                  ElevatedButton(
-                                    onPressed: provider.refreshProducts,
-                                    child: const Text('Retry'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-
-                      return ListView.builder(
-                        controller: _scrollController,
-                        itemCount:
-                            filteredProducts.length +
-                            (provider.isLoadingMore ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index >= filteredProducts.length) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
-                          }
-
-                          final product = filteredProducts[index];
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                            child: ProductCard(
-                              product: product,
-                              onTap: product.id == null
-                                  ? null
-                                  : () {
-                                      context.push(
-                                        Routes.product.pathFromId(product.id!),
-                                      );
-                                    },
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                  child: _buildProductSection(provider, filteredProducts),
                 ),
               ),
             ],
           );
         },
       ),
+    );
+  }
+
+  Widget _buildCategorySection(HomeProvider provider) {
+    switch (provider.categoriesState) {
+      case ProviderViewState.initial:
+        return const SizedBox(
+          height: 48,
+          child: InitialStateWidget(
+            compact: true,
+            message: 'Preparing categories...',
+          ),
+        );
+      case ProviderViewState.loading:
+        return const SizedBox(
+          height: 48,
+          child: LoadingStateWidget(compact: true),
+        );
+      case ProviderViewState.error:
+        return SizedBox(
+          height: 48,
+          child: ErrorStateWidget(
+            compact: true,
+            message:
+                provider.categoriesErrorMessage ?? 'Failed to load categories',
+            onRetry: provider.loadCategories,
+          ),
+        );
+      case ProviderViewState.empty:
+        return const SizedBox(
+          height: 48,
+          child: EmptyStateWidget(
+            compact: true,
+            message: 'No categories found.',
+          ),
+        );
+      case ProviderViewState.loaded:
+        return SizedBox(
+          height: 48,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            scrollDirection: Axis.horizontal,
+            itemCount: provider.categories.length + 1,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return CategoryChip(
+                  label: HomeProvider.allCategory,
+                  isSelected:
+                      provider.selectedCategorySlug == HomeProvider.allCategory,
+                  onTap: () =>
+                      provider.setSelectedCategory(HomeProvider.allCategory),
+                );
+              }
+
+              final category = provider.categories[index - 1];
+              final categorySlug = category.slug ?? category.name ?? '';
+              final categoryName = category.name ?? categorySlug;
+
+              return CategoryChip(
+                label: categoryName,
+                isSelected: provider.selectedCategorySlug == categorySlug,
+                onTap: () => provider.setSelectedCategory(categorySlug),
+              );
+            },
+          ),
+        );
+    }
+  }
+
+  Widget _buildProductSection(
+    HomeProvider provider,
+    List<Product> filteredProducts,
+  ) {
+    switch (provider.productsState) {
+      case ProviderViewState.initial:
+        return _buildScrollableState(
+          const InitialStateWidget(
+            message: 'Enter search or select a category.',
+          ),
+        );
+      case ProviderViewState.loading:
+        return _buildScrollableState(
+          const LoadingStateWidget(message: 'Loading products...'),
+        );
+      case ProviderViewState.error:
+        return _buildScrollableState(
+          ErrorStateWidget(
+            message: provider.errorMessage ?? 'Failed to load products.',
+            onRetry: provider.refreshProducts,
+          ),
+        );
+      case ProviderViewState.empty:
+        return _buildScrollableState(
+          EmptyStateWidget(
+            message: 'No products found.',
+            actionLabel: 'Refresh',
+            onAction: provider.refreshProducts,
+          ),
+        );
+      case ProviderViewState.loaded:
+        return ListView.builder(
+          controller: _scrollController,
+          itemCount: filteredProducts.length + (provider.isLoadingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index >= filteredProducts.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            final product = filteredProducts[index];
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: ProductCard(
+                product: product,
+                onTap: product.id == null
+                    ? null
+                    : () {
+                        context.push(Routes.product.pathFromId(product.id!));
+                      },
+              ),
+            );
+          },
+        );
+    }
+  }
+
+  Widget _buildScrollableState(Widget child) {
+    return ListView(
+      controller: _scrollController,
+      children: [const SizedBox(height: 120), child],
     );
   }
 }

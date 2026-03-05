@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/config/flavor_config.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/constants/theme_constants.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/state/provider_view_state.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/splash/presentation/state/splash_provider.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/empty_state_widget.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/error_state_widget.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/initial_state_widget.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/loading_state_widget.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
@@ -15,66 +20,48 @@ class SplashPage extends StatelessWidget {
         child: Center(
           child: Consumer<SplashProvider>(
             builder: (context, provider, _) {
-              if (!provider.hasConnection) {
-                return Padding(
-                  padding: const EdgeInsets.all(ThemeConstants.defaultPadding),
-                  child: Column(
+              switch (provider.state) {
+                case ProviderViewState.initial:
+                  return const InitialStateWidget(
+                    message: 'Preparing application...',
+                  );
+                case ProviderViewState.loading:
+                  return LoadingStateWidget(
+                    message: 'Checking internet connection...',
+                  );
+                case ProviderViewState.error:
+                  return ErrorStateWidget(
+                    message:
+                        provider.errorMessage ??
+                        'No internet connection. Please try again.',
+                    onRetry: provider.retry,
+                  );
+                case ProviderViewState.empty:
+                  return EmptyStateWidget(
+                    message: 'Nothing to show on splash.',
+                    actionLabel: 'Retry',
+                    onAction: provider.retry,
+                  );
+                case ProviderViewState.loaded:
+                  return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.wifi_off_rounded,
-                        size: 56,
+                        Icons.account_balance_wallet_rounded,
+                        size: 64,
                         color: AppTheme.lightTheme.colorScheme.primary,
                       ),
                       const SizedBox(height: ThemeConstants.defaultPadding),
-                      const Text(
-                        'No Internet Connection',
-                        textAlign: TextAlign.center,
+                      Text(
+                        FlavorConfig.instance.appName,
                         style: TextStyle(
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
                         ),
-                      ),
-                      const SizedBox(height: ThemeConstants.defaultPadding),
-                      const Text(
-                        'Please check your connection and try again.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: ThemeConstants.defaultPadding),
-                      ElevatedButton(
-                        onPressed: provider.retry,
-                        child: const Text('Retry'),
                       ),
                     ],
-                  ),
-                );
+                  );
               }
-
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.account_balance_wallet_rounded,
-                    size: 64,
-                    color: AppTheme.lightTheme.colorScheme.primary,
-                  ),
-                  const SizedBox(height: ThemeConstants.defaultPadding),
-                  Text(
-                    FlavorConfig.instance.appName,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: ThemeConstants.defaultPadding),
-                  if (provider.isLoading)
-                    CircularProgressIndicator(
-                      color: FlavorConfig.instance.primaryColor,
-                    ),
-                ],
-              );
             },
           ),
         ),

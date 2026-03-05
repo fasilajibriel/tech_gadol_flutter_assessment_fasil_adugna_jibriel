@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/error/failure_extensions.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/helpers/typedef.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/helpers/usecase.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/state/provider_view_state.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/models/categories_respones_model/categories_respones_model.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/models/products_response_model/product.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/models/products_response_model/products_response_model.dart';
@@ -31,11 +32,14 @@ class HomeProvider with ChangeNotifier {
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _isCategoriesLoading = false;
+  ProviderViewState _productsState = ProviderViewState.initial;
+  ProviderViewState _categoriesState = ProviderViewState.initial;
   bool _hasMore = true;
   int _limit = 20;
   int _page = 0;
   int _requestCounter = 0;
   String? _errorMessage;
+  String? _categoriesErrorMessage;
   ProductsResponseModel? _productsResponseModel;
   List<Product> _products = <Product>[];
   List<CategoriesResponesModel> _categories = <CategoriesResponesModel>[];
@@ -47,7 +51,10 @@ class HomeProvider with ChangeNotifier {
   bool get isLoadingMore => _isLoadingMore;
   bool get isCategoriesLoading => _isCategoriesLoading;
   bool get hasMore => _hasMore;
+  ProviderViewState get productsState => _productsState;
+  ProviderViewState get categoriesState => _categoriesState;
   String? get errorMessage => _errorMessage;
+  String? get categoriesErrorMessage => _categoriesErrorMessage;
   int get limit => _limit;
   int get page => _page;
   String get searchQuery => _searchQuery;
@@ -95,6 +102,8 @@ class HomeProvider with ChangeNotifier {
   }
 
   Future<void> loadCategories() async {
+    _categoriesErrorMessage = null;
+    _categoriesState = ProviderViewState.loading;
     _isCategoriesLoading = true;
     notifyListeners();
 
@@ -102,11 +111,15 @@ class HomeProvider with ChangeNotifier {
 
     result.fold(
       (failure) {
-        _errorMessage = failure.userMessage;
+        _categoriesErrorMessage = failure.userMessage;
+        _categoriesState = ProviderViewState.error;
       },
       (categoryModels) {
         _categories = categoryModels;
-        _errorMessage = null;
+        _categoriesErrorMessage = null;
+        _categoriesState = _categories.isEmpty
+            ? ProviderViewState.empty
+            : ProviderViewState.loaded;
 
         if (_selectedCategorySlug != allCategory &&
             !_categories.any(
@@ -130,6 +143,7 @@ class HomeProvider with ChangeNotifier {
     _errorMessage = null;
     _products = <Product>[];
     _productsResponseModel = null;
+    _productsState = ProviderViewState.loading;
     await _fetchProducts(isInitialLoad: true);
   }
 
@@ -150,6 +164,7 @@ class HomeProvider with ChangeNotifier {
 
     if (isInitialLoad) {
       _isLoading = true;
+      _productsState = ProviderViewState.loading;
     } else {
       _isLoadingMore = true;
     }
@@ -165,6 +180,9 @@ class HomeProvider with ChangeNotifier {
     result.fold(
       (failure) {
         _errorMessage = failure.userMessage;
+        if (isInitialLoad || _products.isEmpty) {
+          _productsState = ProviderViewState.error;
+        }
       },
       (responseModel) {
         _errorMessage = null;
@@ -177,6 +195,9 @@ class HomeProvider with ChangeNotifier {
 
         final total = responseModel.total ?? _products.length;
         _hasMore = _products.length < total && fetchedProducts.isNotEmpty;
+        _productsState = _products.isEmpty
+            ? ProviderViewState.empty
+            : ProviderViewState.loaded;
 
         if (fetchedProducts.isNotEmpty) {
           _page += 1;
