@@ -46,7 +46,7 @@ class SplashPage extends StatelessWidget {
                 children: [
                   Icon(Icons.account_balance_wallet_rounded, size: 64, color: AppTheme.lightTheme.colorScheme.primary),
                   const SizedBox(height: ThemeConstants.defaultPadding),
-                  const Text('ET Calendar', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  Text(FlavorConfig.instance.appName, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   const SizedBox(height: ThemeConstants.defaultPadding),
                   if (provider.isLoading) CircularProgressIndicator(color: FlavorConfig.instance.primaryColor),
                 ],
