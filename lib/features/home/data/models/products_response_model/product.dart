@@ -56,29 +56,104 @@ class Product extends Equatable {
   });
 
   factory Product.fromMap(Map<String, dynamic> data) => Product(
-    id: data['id'] as int?,
-    title: data['title'] as String?,
-    description: data['description'] as String?,
-    category: data['category'] as String?,
-    price: (data['price'] as num?)?.toDouble(),
-    discountPercentage: (data['discountPercentage'] as num?)?.toDouble(),
-    rating: (data['rating'] as num?)?.toDouble(),
-    stock: data['stock'] as int?,
-    tags: (data['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    brand: data['brand'] as String?,
-    sku: data['sku'] as String?,
-    weight: data['weight'] as int?,
-    dimensions: data['dimensions'] == null ? null : Dimensions.fromMap(data['dimensions'] as Map<String, dynamic>),
-    warrantyInformation: data['warrantyInformation'] as String?,
-    shippingInformation: data['shippingInformation'] as String?,
-    availabilityStatus: data['availabilityStatus'] as String?,
-    reviews: (data['reviews'] as List<dynamic>?)?.map((e) => Review.fromMap(e as Map<String, dynamic>)).toList(),
-    returnPolicy: data['returnPolicy'] as String?,
-    minimumOrderQuantity: data['minimumOrderQuantity'] as int?,
-    meta: data['meta'] == null ? null : Meta.fromMap(data['meta'] as Map<String, dynamic>),
-    images: (data['images'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    thumbnail: data['thumbnail'] as String?,
+    id: _asInt(data['id']),
+    title: _asString(data['title']),
+    description: _asString(data['description']),
+    category: _asString(data['category']),
+    price: _asDouble(data['price']),
+    discountPercentage: _asDouble(data['discountPercentage']),
+    rating: _asDouble(data['rating']),
+    stock: _asInt(data['stock']),
+    tags: _toStringList(data['tags']),
+    brand: _asString(data['brand']),
+    sku: _asString(data['sku']),
+    weight: _asInt(data['weight']),
+    dimensions: _toDimensions(data['dimensions']),
+    warrantyInformation: _asString(data['warrantyInformation']),
+    shippingInformation: _asString(data['shippingInformation']),
+    availabilityStatus: _asString(data['availabilityStatus']),
+    reviews: _toReviews(data['reviews']),
+    returnPolicy: _asString(data['returnPolicy']),
+    minimumOrderQuantity: _asInt(data['minimumOrderQuantity']),
+    meta: _toMeta(data['meta']),
+    images: _toStringList(data['images']),
+    thumbnail: _asString(data['thumbnail']),
   );
+
+  static String? _asString(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    final stringValue = value.toString().trim();
+    return stringValue.isEmpty ? null : stringValue;
+  }
+
+  static int? _asInt(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    return int.tryParse(value.toString());
+  }
+
+  static double? _asDouble(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is double) {
+      return value;
+    }
+    if (value is num) {
+      return value.toDouble();
+    }
+    return double.tryParse(value.toString());
+  }
+
+  static List<String>? _toStringList(dynamic value) {
+    if (value is! List) {
+      return null;
+    }
+    return value
+        .where((element) => element != null)
+        .map((element) => element.toString().trim())
+        .where((element) => element.isNotEmpty)
+        .toList();
+  }
+
+  static Dimensions? _toDimensions(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return Dimensions.fromMap(value);
+    }
+    if (value is Map) {
+      return Dimensions.fromMap(Map<String, dynamic>.from(value));
+    }
+    return null;
+  }
+
+  static Meta? _toMeta(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return Meta.fromMap(value);
+    }
+    if (value is Map) {
+      return Meta.fromMap(Map<String, dynamic>.from(value));
+    }
+    return null;
+  }
+
+  static List<Review>? _toReviews(dynamic value) {
+    if (value is! List) {
+      return null;
+    }
+    return value
+        .whereType<Map>()
+        .map((element) => Review.fromMap(Map<String, dynamic>.from(element)))
+        .toList();
+  }
 
   Map<String, dynamic> toMap() => {
     'id': id,

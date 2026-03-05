@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/constants/theme_constants.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/domain/app_logger.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/providers/theme_provider.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/di/injector.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/models/products_response_model/product.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/helpers/product_data_guard.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -12,6 +15,18 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logger = getIt<AppLogger>();
+    ProductDataGuard.logImageWarningIfNeeded(
+      product,
+      logger,
+      source: 'ProductCard',
+    );
+    ProductDataGuard.logPriceErrorIfNeeded(
+      product,
+      logger,
+      source: 'ProductCard',
+    );
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -49,6 +64,7 @@ class ProductCard extends StatelessWidget {
   // Sub-widgets for layout clarity and performance
 
   Widget _buildImage(BuildContext context) {
+    final imageUrl = ProductDataGuard.primaryImageUrl(product);
     return Container(
       width: 72,
       height: 72,
@@ -59,12 +75,22 @@ class ProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Image.network(
-        product.thumbnail ?? "",
-        fit: BoxFit.contain, // Best for isolating products
-        errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.shopping_bag_outlined),
-      ),
+      child: imageUrl == null
+          ? const Icon(Icons.image_not_supported)
+          : Image.network(
+              imageUrl,
+              fit: BoxFit.contain, // Best for isolating products
+              errorBuilder: (context, error, stackTrace) {
+                final logger = getIt<AppLogger>();
+                ProductDataGuard.logImageLoadFailureIfNeeded(
+                  product,
+                  imageUrl,
+                  logger,
+                  source: 'ProductCard',
+                );
+                return const Icon(Icons.shopping_bag_outlined);
+              },
+            ),
     );
   }
 
@@ -74,22 +100,26 @@ class ProductCard extends StatelessWidget {
       children: [
         // Title
         Text(
-          product.title ?? "",
+          ProductDataGuard.displayTitle(product),
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        // Simplified Info (Brand only for compact view)
         Text(
-          "By: ${product.brand}",
+          'By: ${ProductDataGuard.displayBrand(product)}',
           style: TextStyle(fontSize: 14, color: Colors.grey[600]),
         ),
         const Spacer(),
-        // Simplified Price (Mapped directly from JSON price)
         Text(
-          '\$${product.price?.toStringAsFixed(2)}',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ProductDataGuard.priceLabel(product),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: ProductDataGuard.hasValidPrice(product)
+                ? null
+                : Colors.redAccent,
+          ),
         ),
       ],
     );
