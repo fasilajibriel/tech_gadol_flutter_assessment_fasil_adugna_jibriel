@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/app/routes.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/providers/theme_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/state/provider_view_state.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/di/injector.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/models/products_response_model/product.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/presentation/state/home_provider.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/product/presentation/state/product_provider.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/product/presentation/widgets/product_detail_body.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/category_chip.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/empty_state_widget.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/error_state_widget.dart';
@@ -23,12 +26,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late final ScrollController _scrollController;
   late final TextEditingController _searchController;
+  late final ProductProvider _productDetailProvider;
+  int? _selectedProductId;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     _searchController = TextEditingController();
+    _productDetailProvider = getIt<ProductProvider>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HomeProvider>().initialize();
@@ -41,6 +47,7 @@ class _HomePageState extends State<HomePage> {
       ..removeListener(_onScroll)
       ..dispose();
     _searchController.dispose();
+    _productDetailProvider.dispose();
     super.dispose();
   }
 
@@ -63,6 +70,23 @@ class _HomePageState extends State<HomePage> {
     if (mounted) {
       FocusScope.of(context).unfocus();
     }
+  }
+
+  void _onProductTap(Product product, bool isWideScreen) {
+    final productId = product.id;
+    if (productId == null) {
+      return;
+    }
+
+    if (isWideScreen) {
+      setState(() {
+        _selectedProductId = productId;
+      });
+      _productDetailProvider.loadProduct(productId);
+      return;
+    }
+
+    context.push(Routes.product.pathFromId(productId));
   }
 
   @override
@@ -90,48 +114,89 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Consumer<HomeProvider>(
         builder: (context, provider, _) {
-          final filteredProducts = provider.filteredProducts;
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isWideScreen = constraints.maxWidth >= 768;
+              if (!isWideScreen) {
+                return _buildListPanel(provider, isWideScreen: false);
+              }
 
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                child: SearchBar(
-                  controller: _searchController,
-                  hintText: 'Search products',
-                  onChanged: _onSearchChanged,
-                  onSubmitted: (_) => _onSearchSubmitted(),
-                  trailing: [
-                    IconButton(
-                      onPressed: () {
-                        _onSearchSubmitted();
-                      },
-                      icon: const Icon(Icons.search),
-                    ),
-                    if (provider.searchQuery.isNotEmpty)
-                      IconButton(
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                          _onSearchSubmitted();
-                        },
-                        icon: const Icon(Icons.clear),
-                      ),
-                  ],
-                ),
-              ),
-              _buildCategorySection(provider),
-              const SizedBox(height: 8),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: provider.refreshProducts,
-                  child: _buildProductSection(provider, filteredProducts),
-                ),
-              ),
-            ],
+              final leftPanelWidth = constraints.maxWidth >= 1200
+                  ? 400.0
+                  : 360.0;
+              return Row(
+                children: [
+                  SizedBox(
+                    width: leftPanelWidth,
+                    child: _buildListPanel(provider, isWideScreen: true),
+                  ),
+                  const VerticalDivider(width: 1),
+                  Expanded(
+                    child: _selectedProductId == null
+                        ? const EmptyStateWidget(
+                            message: 'Select a product to view details.',
+                          )
+                        : ChangeNotifierProvider<ProductProvider>.value(
+                            value: _productDetailProvider,
+                            child: ProductDetailBody(
+                              key: ValueKey<int>(_selectedProductId!),
+                              productId: _selectedProductId!,
+                              embedded: true,
+                            ),
+                          ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
+    );
+  }
+
+  Widget _buildListPanel(HomeProvider provider, {required bool isWideScreen}) {
+    final filteredProducts = provider.filteredProducts;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+          child: SearchBar(
+            controller: _searchController,
+            hintText: 'Search products',
+            onChanged: _onSearchChanged,
+            onSubmitted: (_) => _onSearchSubmitted(),
+            trailing: [
+              IconButton(
+                onPressed: () {
+                  _onSearchSubmitted();
+                },
+                icon: const Icon(Icons.search),
+              ),
+              if (provider.searchQuery.isNotEmpty)
+                IconButton(
+                  onPressed: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                    _onSearchSubmitted();
+                  },
+                  icon: const Icon(Icons.clear),
+                ),
+            ],
+          ),
+        ),
+        _buildCategorySection(provider),
+        const SizedBox(height: 8),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: provider.refreshProducts,
+            child: _buildProductSection(
+              provider,
+              filteredProducts,
+              isWideScreen: isWideScreen,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -204,8 +269,9 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildProductSection(
     HomeProvider provider,
-    List<Product> filteredProducts,
-  ) {
+    List<Product> filteredProducts, {
+    required bool isWideScreen,
+  }) {
     switch (provider.productsState) {
       case ProviderViewState.initial:
         return _buildScrollableState(
@@ -249,11 +315,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
               child: ProductCard(
                 product: product,
-                onTap: product.id == null
-                    ? null
-                    : () {
-                        context.push(Routes.product.pathFromId(product.id!));
-                      },
+                onTap: () => _onProductTap(product, isWideScreen),
               ),
             );
           },
