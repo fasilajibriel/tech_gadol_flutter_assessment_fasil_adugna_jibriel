@@ -2,6 +2,7 @@ import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/app/go_router
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/config/flavor_config.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/providers/theme_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/di/injector.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/presentation/state/home_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/splash/presentation/state/splash_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => getIt<ThemeProvider>()..initialize(),
         ),
+        ChangeNotifierProvider(create: (_) => getIt<HomeProvider>()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

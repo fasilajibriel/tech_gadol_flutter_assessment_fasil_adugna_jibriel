@@ -14,6 +14,11 @@ import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/domain/l
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/providers/theme_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/services/network/api_service.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/services/network/mock_service.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/data_sources/home_remote_data_source.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/repositories/home_repository_impl.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/repositories/home_repository.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/usecases/get_products_use_case.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/presentation/state/home_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/splash/presentation/state/splash_provider.dart';
 
 final getIt = GetIt.instance;
@@ -25,16 +30,20 @@ Future<void> setupDependencies() async {
   String resolvedBaseUrl;
   switch (flavorConfig.flavor) {
     case Flavor.mock:
-      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
+      resolvedBaseUrl =
+          dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
       break;
     case Flavor.dev:
-      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
+      resolvedBaseUrl =
+          dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
       break;
     case Flavor.uat:
-      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
+      resolvedBaseUrl =
+          dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
       break;
     case Flavor.prod:
-      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
+      resolvedBaseUrl =
+          dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
       break;
   }
 
@@ -51,14 +60,34 @@ Future<void> setupDependencies() async {
 
   getIt.registerSingleton(NavigationKeyManager());
   getIt.registerLazySingleton<AppLogger>(() => AppLoggerImpl(getIt<Logger>()));
-  getIt.registerLazySingleton<LocalStorageManager>(() => LocalStorageManagerImpl(getIt<FlutterSecureStorage>()));
-  getIt.registerSingleton<AppRouter>(AppRouterImpl(getIt<NavigationKeyManager>()));
+  getIt.registerLazySingleton<LocalStorageManager>(
+    () => LocalStorageManagerImpl(getIt<FlutterSecureStorage>()),
+  );
+  getIt.registerSingleton<AppRouter>(
+    AppRouterImpl(getIt<NavigationKeyManager>()),
+  );
 
   getIt.registerLazySingleton<ApiService>(
-    () => useMock ? MockService() : ApiService(dio: dio, appLogger: getIt<AppLogger>()),
+    () => useMock
+        ? MockService()
+        : ApiService(dio: dio, appLogger: getIt<AppLogger>()),
+  );
+
+  getIt.registerLazySingleton<HomeRemoteDataSource>(
+    () => HomeRemoteDataSourceImpl(apiService: getIt<ApiService>()),
+  );
+  getIt.registerLazySingleton<HomeRepository>(
+    () =>
+        HomeRepositoryImpl(homeRemoteDataSource: getIt<HomeRemoteDataSource>()),
+  );
+  getIt.registerLazySingleton<GetProductsUseCase>(
+    () => GetProductsUseCase(homeRepository: getIt<HomeRepository>()),
   );
 
   getIt.registerFactory(() => SplashProvider(router: getIt<AppRouter>()));
+  getIt.registerFactory(
+    () => HomeProvider(getProductsUseCase: getIt<GetProductsUseCase>()),
+  );
 
   getIt.registerFactory(() => ThemeProvider(getIt<LocalStorageManager>()));
 }
