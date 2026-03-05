@@ -26,7 +26,9 @@ extension FailureExtensions on Failure {
       case NavigationFailure():
         return 'Navigation error: $message';
       case UnknownFailure():
-        return 'Something went wrong. Please try again later.';
+        return message.isNotEmpty
+            ? message
+            : 'Something went wrong. Please try again later.';
     }
   }
 

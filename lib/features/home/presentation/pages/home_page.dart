@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/presentation/state/home_provider.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/product_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -84,10 +85,9 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 final product = provider.products[index];
-                return ListTile(
-                  title: Text(product.title ?? 'Untitled Product'),
-                  subtitle: Text(product.description ?? ''),
-                  trailing: Text('\$${product.price ?? 0}'),
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                  child: ProductCard(product: product, onTap: () {}),
                 );
               },
             ),

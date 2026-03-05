@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/models/products_response_model/product.dart';
 
 class ProductCard extends StatelessWidget {
@@ -19,7 +18,10 @@ class ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildImageHeader(),
-            Padding(padding: const EdgeInsets.all(12.0), child: _buildProductDetails()),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: _buildProductDetails(),
+            ),
           ],
         ),
       ),
@@ -36,7 +38,8 @@ class ProductCard extends StatelessWidget {
             product.thumbnail ?? "",
             fit: BoxFit.cover,
             // Always handle loading/error states for production-grade UI
-            errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image)),
+            errorBuilder: (context, error, stackTrace) =>
+                const Center(child: Icon(Icons.broken_image)),
           ),
         ),
         if ((product.discountPercentage ?? 0) > 0)
@@ -45,10 +48,17 @@ class ProductCard extends StatelessWidget {
             left: 8,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(4)),
+              decoration: BoxDecoration(
+                color: Colors.redAccent,
+                borderRadius: BorderRadius.circular(4),
+              ),
               child: Text(
                 '-${product.discountPercentage?.toStringAsFixed(0)}%',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
             ),
           ),
@@ -62,7 +72,11 @@ class ProductCard extends StatelessWidget {
       children: [
         Text(
           product.brand?.toUpperCase() ?? "",
-          style: TextStyle(fontSize: 10, color: Colors.grey[600], letterSpacing: 1.2),
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.grey[600],
+            letterSpacing: 1.2,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -76,14 +90,24 @@ class ProductCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '\$${product.price?.toStringAsFixed(2)}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.green),
+              '\$${(product.price ?? 0).toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Colors.green,
+              ),
             ),
             Row(
               children: [
                 const Icon(Icons.star, color: Colors.amber, size: 16),
                 const SizedBox(width: 2),
-                Text(product.rating.toString(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  (product.rating ?? 0).toStringAsFixed(1),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ],

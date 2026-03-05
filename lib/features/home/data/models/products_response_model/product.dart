@@ -64,25 +64,19 @@ class Product extends Equatable {
     discountPercentage: (data['discountPercentage'] as num?)?.toDouble(),
     rating: (data['rating'] as num?)?.toDouble(),
     stock: data['stock'] as int?,
-    tags: data['tags'] as List<String>?,
+    tags: (data['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
     brand: data['brand'] as String?,
     sku: data['sku'] as String?,
     weight: data['weight'] as int?,
-    dimensions: data['dimensions'] == null
-        ? null
-        : Dimensions.fromMap(data['dimensions'] as Map<String, dynamic>),
+    dimensions: data['dimensions'] == null ? null : Dimensions.fromMap(data['dimensions'] as Map<String, dynamic>),
     warrantyInformation: data['warrantyInformation'] as String?,
     shippingInformation: data['shippingInformation'] as String?,
     availabilityStatus: data['availabilityStatus'] as String?,
-    reviews: (data['reviews'] as List<dynamic>?)
-        ?.map((e) => Review.fromMap(e as Map<String, dynamic>))
-        .toList(),
+    reviews: (data['reviews'] as List<dynamic>?)?.map((e) => Review.fromMap(e as Map<String, dynamic>)).toList(),
     returnPolicy: data['returnPolicy'] as String?,
     minimumOrderQuantity: data['minimumOrderQuantity'] as int?,
-    meta: data['meta'] == null
-        ? null
-        : Meta.fromMap(data['meta'] as Map<String, dynamic>),
-    images: data['images'] as List<String>?,
+    meta: data['meta'] == null ? null : Meta.fromMap(data['meta'] as Map<String, dynamic>),
+    images: (data['images'] as List<dynamic>?)?.map((e) => e as String).toList(),
     thumbnail: data['thumbnail'] as String?,
   );
 
@@ -196,7 +190,7 @@ class Product extends Equatable {
       returnPolicy,
       minimumOrderQuantity,
       meta,
-      images,
+      // images,
       thumbnail,
     ];
   }
