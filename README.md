@@ -53,12 +53,35 @@ flutter run --flavor dev --dart-define=FLAVOR=dev
 - Router config lives in `lib/app/go_router_config.dart`.
 - Navigation abstraction (`AppRouter`) is implemented by `AppRouterImpl` to avoid calling router APIs directly from providers/business flow.
 
+## Design System Rationale
+
+- Component API choices currently prioritize fast delivery and readability over deep customization.
+- Theming is centralized through `ThemeConstants` and `AppTheme` to keep light/dark behavior and color usage consistent across screens.
+- The current implementation applies brand colors first; full brand expression (logo integration, broader component styling, and richer visual tokens) is only partially implemented.
+
+## Limitations and Shortcuts
+
+### Improvements With More Time
+
+- Design and implement a dedicated showcase page.
+- Improve loading states with shimmer-based skeletons instead of basic loaders.
+- Add company logo usage on splash and across the wider theme system (beyond colors).
+- Separate presentation content into smaller widgets and group them by feature.
+- Presentation content is still too page-heavy in places and I would split into smaller reusable widgets for better composition and maintainability.
+
+### Shortcuts Taken
+
+- Incorporated icon packages to move faster on icon coverage.
+- Referred to Pinterest for UI idea exploration and visual direction.
+
 ## AI Usage and Engineering Critique
 
 AI-assisted work in this project:
 
 - Used AI for repetitive implementation tasks (boilerplate generation, explicit state handling after the first pattern was designed).
 - Used AI to speed up flavor-setup scaffolding.
+- Used AI to make the README more professional after providing clear guidance.
+- Used AI to help write tests, then refined outputs manually.
 - Used AI to critique and improve the codebase.
 
 ## Quality Gates
