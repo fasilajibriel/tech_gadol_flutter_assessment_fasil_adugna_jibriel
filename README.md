@@ -28,7 +28,6 @@ Flavor patterns and setup rules are documented in `flavor_setup.md`.
 Run examples:
 
 ```bash
-flutter run --dart-define=FLAVOR=mock
 flutter run --dart-define=FLAVOR=dev
 flutter run --dart-define=FLAVOR=uat
 flutter run --dart-define=FLAVOR=prod
