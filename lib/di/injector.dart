@@ -17,7 +17,10 @@ import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/services
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/data_sources/home_remote_data_source.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/repositories/home_repository_impl.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/repositories/home_repository.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/usecases/get_categories_use_case.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/usecases/get_products_by_category_use_case.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/usecases/get_products_use_case.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/usecases/search_products_use_case.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/presentation/state/home_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/splash/presentation/state/splash_provider.dart';
 
@@ -83,10 +86,24 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<GetProductsUseCase>(
     () => GetProductsUseCase(homeRepository: getIt<HomeRepository>()),
   );
+  getIt.registerLazySingleton<SearchProductsUseCase>(
+    () => SearchProductsUseCase(homeRepository: getIt<HomeRepository>()),
+  );
+  getIt.registerLazySingleton<GetProductsByCategoryUseCase>(
+    () => GetProductsByCategoryUseCase(homeRepository: getIt<HomeRepository>()),
+  );
+  getIt.registerLazySingleton<GetCategoriesUseCase>(
+    () => GetCategoriesUseCase(homeRepository: getIt<HomeRepository>()),
+  );
 
   getIt.registerFactory(() => SplashProvider(router: getIt<AppRouter>()));
   getIt.registerFactory(
-    () => HomeProvider(getProductsUseCase: getIt<GetProductsUseCase>()),
+    () => HomeProvider(
+      getProductsUseCase: getIt<GetProductsUseCase>(),
+      searchProductsUseCase: getIt<SearchProductsUseCase>(),
+      getProductsByCategoryUseCase: getIt<GetProductsByCategoryUseCase>(),
+      getCategoriesUseCase: getIt<GetCategoriesUseCase>(),
+    ),
   );
 
   getIt.registerFactory(() => ThemeProvider(getIt<LocalStorageManager>()));

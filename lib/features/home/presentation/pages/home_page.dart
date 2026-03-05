@@ -23,10 +23,7 @@ class _HomePageState extends State<HomePage> {
     _searchController = TextEditingController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final homeProvider = context.read<HomeProvider>();
-      if (homeProvider.products.isEmpty && !homeProvider.isLoading) {
-        homeProvider.loadInitialProducts();
-      }
+      context.read<HomeProvider>().initialize();
     });
   }
 
@@ -46,6 +43,17 @@ class _HomePageState extends State<HomePage> {
     final threshold = _scrollController.position.maxScrollExtent - 200;
     if (_scrollController.position.pixels >= threshold) {
       context.read<HomeProvider>().loadMoreProducts();
+    }
+  }
+
+  void _onSearchChanged(String value) {
+    context.read<HomeProvider>().setSearchQuery(value);
+  }
+
+  Future<void> _onSearchSubmitted() async {
+    await context.read<HomeProvider>().applySearch();
+    if (mounted) {
+      FocusScope.of(context).unfocus();
     }
   }
 
@@ -73,23 +81,6 @@ class _HomePageState extends State<HomePage> {
         builder: (context, provider, _) {
           final filteredProducts = provider.filteredProducts;
 
-          if (provider.isLoading && provider.products.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (provider.errorMessage != null && provider.products.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(provider.errorMessage!),
-                  const SizedBox(height: 12),
-                  ElevatedButton(onPressed: provider.refreshProducts, child: const Text('Retry')),
-                ],
-              ),
-            );
-          }
-
           return Column(
             children: [
               Padding(
@@ -97,14 +88,21 @@ class _HomePageState extends State<HomePage> {
                 child: SearchBar(
                   controller: _searchController,
                   hintText: 'Search products',
-                  leading: const Icon(Icons.search),
-                  onChanged: provider.setSearchQuery,
+                  onChanged: _onSearchChanged,
+                  onSubmitted: (_) => _onSearchSubmitted(),
                   trailing: [
+                    IconButton(
+                      onPressed: () {
+                        _onSearchSubmitted();
+                      },
+                      icon: const Icon(Icons.search),
+                    ),
                     if (provider.searchQuery.isNotEmpty)
                       IconButton(
                         onPressed: () {
                           _searchController.clear();
-                          provider.setSearchQuery('');
+                          _onSearchChanged('');
+                          _onSearchSubmitted();
                         },
                         icon: const Icon(Icons.clear),
                       ),
@@ -116,14 +114,25 @@ class _HomePageState extends State<HomePage> {
                 child: ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   scrollDirection: Axis.horizontal,
-                  itemCount: provider.categories.length,
+                  itemCount: provider.categories.length + 1,
                   separatorBuilder: (_, _) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
-                    final category = provider.categories[index];
+                    if (index == 0) {
+                      return CategoryChip(
+                        label: HomeProvider.allCategory,
+                        isSelected: provider.selectedCategorySlug == HomeProvider.allCategory,
+                        onTap: () => provider.setSelectedCategory(HomeProvider.allCategory),
+                      );
+                    }
+
+                    final category = provider.categories[index - 1];
+                    final categorySlug = category.slug ?? category.name ?? '';
+                    final categoryName = category.name ?? categorySlug;
+
                     return CategoryChip(
-                      label: category,
-                      isSelected: provider.selectedCategory == category,
-                      onTap: () => provider.setSelectedCategory(category),
+                      label: categoryName,
+                      isSelected: provider.selectedCategorySlug == categorySlug,
+                      onTap: () => provider.setSelectedCategory(categorySlug),
                     );
                   },
                 ),
@@ -132,21 +141,54 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: provider.refreshProducts,
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: filteredProducts.length + (provider.isLoadingMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index >= filteredProducts.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(child: CircularProgressIndicator()),
+                  child: Builder(
+                    builder: (context) {
+                      if (provider.isLoading && filteredProducts.isEmpty) {
+                        return ListView(
+                          controller: _scrollController,
+                          children: const [
+                            SizedBox(height: 120),
+                            Center(child: CircularProgressIndicator()),
+                          ],
                         );
                       }
 
-                      final product = filteredProducts[index];
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                        child: ProductCard(product: product),
+                      if (provider.errorMessage != null && filteredProducts.isEmpty) {
+                        return ListView(
+                          controller: _scrollController,
+                          children: [
+                            const SizedBox(height: 120),
+                            Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(provider.errorMessage!),
+                                  const SizedBox(height: 12),
+                                  ElevatedButton(onPressed: provider.refreshProducts, child: const Text('Retry')),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      return ListView.builder(
+                        controller: _scrollController,
+                        itemCount: filteredProducts.length + (provider.isLoadingMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index >= filteredProducts.length) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+
+                          final product = filteredProducts[index];
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                            child: ProductCard(product: product),
+                          );
+                        },
                       );
                     },
                   ),

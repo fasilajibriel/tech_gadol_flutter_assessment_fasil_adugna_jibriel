@@ -16,12 +16,8 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => getIt<SplashProvider>()..initialize(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => getIt<ThemeProvider>()..initialize(),
-        ),
+        ChangeNotifierProvider(create: (_) => getIt<SplashProvider>()..initialize()),
+        ChangeNotifierProvider(create: (_) => getIt<ThemeProvider>()..initialize()),
         ChangeNotifierProvider(create: (_) => getIt<HomeProvider>()),
       ],
       child: Consumer<ThemeProvider>(
@@ -30,17 +26,24 @@ class App extends StatelessWidget {
             routerConfig: GoRouterConfig.getRouter(),
             title: FlavorConfig.instance.appName,
             theme: AppTheme.lightTheme.copyWith(
-              textTheme: AppTheme.lightTheme.textTheme.apply(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-              ),
+              textTheme: AppTheme.lightTheme.textTheme.apply(fontFamily: GoogleFonts.poppins().fontFamily),
             ),
             darkTheme: AppTheme.darkTheme.copyWith(
-              textTheme: AppTheme.darkTheme.textTheme.apply(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-              ),
+              textTheme: AppTheme.darkTheme.textTheme.apply(fontFamily: GoogleFonts.poppins().fontFamily),
             ),
             themeMode: themeProvider.themeMode,
-            debugShowCheckedModeBanner: !FlavorConfig.instance.isProduction,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) {
+              // Only show banner if not in production
+              if (FlavorConfig.instance.isProduction) return child!;
+
+              return Banner(
+                message: FlavorConfig.instance.environment.toUpperCase().substring(0, 3), // "DEV" or "UAT"
+                location: BannerLocation.topEnd,
+                color: Colors.red[900]!,
+                child: child!,
+              );
+            },
           );
         },
       ),

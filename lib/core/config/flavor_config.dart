@@ -75,7 +75,10 @@ class FlavorConfig {
   }
 
   static Flavor fromName(String value) {
-    return Flavor.values.firstWhere((flavor) => flavor.name == value.toLowerCase(), orElse: () => Flavor.dev);
+    return Flavor.values.firstWhere(
+      (flavor) => flavor.name == value.toLowerCase(),
+      orElse: () => Flavor.dev,
+    );
   }
 
   static FlavorConfig get instance {

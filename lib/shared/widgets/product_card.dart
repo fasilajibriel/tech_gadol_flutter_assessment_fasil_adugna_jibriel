@@ -18,7 +18,13 @@ class ProductCard extends StatelessWidget {
             ? ThemeConstants.darkCardBgColor
             : ThemeConstants.lightCardBgColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -52,7 +58,8 @@ class ProductCard extends StatelessWidget {
       child: Image.network(
         product.thumbnail ?? "",
         fit: BoxFit.contain, // Best for isolating products
-        errorBuilder: (ctx, _, __) => const Icon(Icons.shopping_bag_outlined),
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.shopping_bag_outlined),
       ),
     );
   }
@@ -70,7 +77,10 @@ class ProductCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         // Simplified Info (Brand only for compact view)
-        Text("By: ${product.brand}", style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+        Text(
+          "By: ${product.brand}",
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+        ),
         const Spacer(),
         // Simplified Price (Mapped directly from JSON price)
         Text(
