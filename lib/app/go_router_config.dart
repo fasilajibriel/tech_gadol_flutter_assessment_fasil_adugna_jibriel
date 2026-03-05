@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/app/navigation_key_manager.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/app/routes.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/di/injector.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/product/presentation/state/product_provider.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter _appRouter = GoRouter(
@@ -14,6 +17,22 @@ final GoRouter _appRouter = GoRouter(
     GoRoute(
       path: Routes.home.path,
       builder: (context, state) => Routes.home.builder(context, state.extra),
+    ),
+    GoRoute(
+      path: Routes.product.path,
+      builder: (context, state) {
+        final productId = int.tryParse(state.pathParameters['id'] ?? '');
+        if (productId == null) {
+          return const Scaffold(
+            body: Center(child: Text('Invalid product id')),
+          );
+        }
+
+        return ChangeNotifierProvider(
+          create: (_) => getIt<ProductProvider>()..loadProduct(productId),
+          child: Routes.product.builder(context, productId),
+        );
+      },
     ),
   ],
   redirect: (context, state) async {

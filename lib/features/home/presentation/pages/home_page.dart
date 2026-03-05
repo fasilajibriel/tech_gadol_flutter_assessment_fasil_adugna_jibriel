@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/app/routes.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/providers/theme_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/presentation/state/home_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/shared/widgets/category_chip.dart';
@@ -62,14 +64,17 @@ class _HomePageState extends State<HomePage> {
     final themeProvider = context.watch<ThemeProvider>();
     final isDarkMode =
         themeProvider.themeMode == ThemeMode.dark ||
-        (themeProvider.themeMode == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
+        (themeProvider.themeMode == ThemeMode.system &&
+            Theme.of(context).brightness == Brightness.dark);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
           IconButton(
-            tooltip: isDarkMode ? 'Switch to light mode' : 'Switch to dark mode',
+            tooltip: isDarkMode
+                ? 'Switch to light mode'
+                : 'Switch to dark mode',
             onPressed: () {
               context.read<ThemeProvider>().toggleTheme();
             },
@@ -120,8 +125,12 @@ class _HomePageState extends State<HomePage> {
                     if (index == 0) {
                       return CategoryChip(
                         label: HomeProvider.allCategory,
-                        isSelected: provider.selectedCategorySlug == HomeProvider.allCategory,
-                        onTap: () => provider.setSelectedCategory(HomeProvider.allCategory),
+                        isSelected:
+                            provider.selectedCategorySlug ==
+                            HomeProvider.allCategory,
+                        onTap: () => provider.setSelectedCategory(
+                          HomeProvider.allCategory,
+                        ),
                       );
                     }
 
@@ -153,7 +162,8 @@ class _HomePageState extends State<HomePage> {
                         );
                       }
 
-                      if (provider.errorMessage != null && filteredProducts.isEmpty) {
+                      if (provider.errorMessage != null &&
+                          filteredProducts.isEmpty) {
                         return ListView(
                           controller: _scrollController,
                           children: [
@@ -164,7 +174,10 @@ class _HomePageState extends State<HomePage> {
                                 children: [
                                   Text(provider.errorMessage!),
                                   const SizedBox(height: 12),
-                                  ElevatedButton(onPressed: provider.refreshProducts, child: const Text('Retry')),
+                                  ElevatedButton(
+                                    onPressed: provider.refreshProducts,
+                                    child: const Text('Retry'),
+                                  ),
                                 ],
                               ),
                             ),
@@ -174,7 +187,9 @@ class _HomePageState extends State<HomePage> {
 
                       return ListView.builder(
                         controller: _scrollController,
-                        itemCount: filteredProducts.length + (provider.isLoadingMore ? 1 : 0),
+                        itemCount:
+                            filteredProducts.length +
+                            (provider.isLoadingMore ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (index >= filteredProducts.length) {
                             return const Padding(
@@ -186,7 +201,16 @@ class _HomePageState extends State<HomePage> {
                           final product = filteredProducts[index];
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                            child: ProductCard(product: product),
+                            child: ProductCard(
+                              product: product,
+                              onTap: product.id == null
+                                  ? null
+                                  : () {
+                                      context.push(
+                                        Routes.product.pathFromId(product.id!),
+                                      );
+                                    },
+                            ),
                           );
                         },
                       );

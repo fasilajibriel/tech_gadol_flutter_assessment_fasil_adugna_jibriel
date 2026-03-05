@@ -6,4 +6,6 @@ class APIConstants {
 
   static String productsByCategory(String category) =>
       '/products/category/${Uri.encodeComponent(category)}';
+
+  static String productById(int id) => '/products/$id';
 }

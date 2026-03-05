@@ -22,6 +22,11 @@ import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/usecases/get_products_use_case.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/usecases/search_products_use_case.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/presentation/state/home_provider.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/product/data/data_sources/product_remote_data_source.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/product/data/repositories/product_repository_impl.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/product/domain/repositories/product_repository.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/product/domain/usecases/get_product_by_id_use_case.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/product/presentation/state/product_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/splash/presentation/state/splash_provider.dart';
 
 final getIt = GetIt.instance;
@@ -95,6 +100,17 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<GetCategoriesUseCase>(
     () => GetCategoriesUseCase(homeRepository: getIt<HomeRepository>()),
   );
+  getIt.registerLazySingleton<ProductRemoteDataSource>(
+    () => ProductRemoteDataSourceImpl(apiService: getIt<ApiService>()),
+  );
+  getIt.registerLazySingleton<ProductRepository>(
+    () => ProductRepositoryImpl(
+      remoteDataSource: getIt<ProductRemoteDataSource>(),
+    ),
+  );
+  getIt.registerLazySingleton<GetProductByIdUseCase>(
+    () => GetProductByIdUseCase(repository: getIt<ProductRepository>()),
+  );
 
   getIt.registerFactory(() => SplashProvider(router: getIt<AppRouter>()));
   getIt.registerFactory(
@@ -104,6 +120,10 @@ Future<void> setupDependencies() async {
       getProductsByCategoryUseCase: getIt<GetProductsByCategoryUseCase>(),
       getCategoriesUseCase: getIt<GetCategoriesUseCase>(),
     ),
+  );
+  getIt.registerFactory(
+    () =>
+        ProductProvider(getProductByIdUseCase: getIt<GetProductByIdUseCase>()),
   );
 
   getIt.registerFactory(() => ThemeProvider(getIt<LocalStorageManager>()));

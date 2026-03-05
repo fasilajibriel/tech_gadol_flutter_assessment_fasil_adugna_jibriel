@@ -6,37 +6,41 @@ import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home
 
 class ProductCard extends StatelessWidget {
   final Product product;
+  final VoidCallback? onTap;
 
-  const ProductCard({super.key, required this.product});
+  const ProductCard({super.key, required this.product, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: context.read<ThemeProvider>().themeMode == ThemeMode.dark
-            ? ThemeConstants.darkCardBgColor
-            : ThemeConstants.lightCardBgColor,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: context.read<ThemeProvider>().themeMode == ThemeMode.dark
+                ? ThemeConstants.darkCardBgColor
+                : ThemeConstants.lightCardBgColor,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            // 1. Image in Rounded Container
-            _buildImage(context),
-            const SizedBox(width: 16),
-            // 2. Product Details
-            Expanded(child: _buildDetails(context)),
-            // 3. Quantity
-            // _buildQuantity(),
-          ],
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                _buildImage(context),
+                const SizedBox(width: 16),
+                Expanded(child: _buildDetails(context)),
+              ],
+            ),
+          ),
         ),
       ),
     );
