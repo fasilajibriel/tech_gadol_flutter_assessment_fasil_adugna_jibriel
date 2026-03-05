@@ -33,7 +33,9 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: FlavorConfig.instance.primaryColor,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemeConstants.fieldRadius)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ThemeConstants.fieldRadius),
+          ),
           padding: const EdgeInsets.all(ThemeConstants.defaultPadding),
         ),
       ),
@@ -53,7 +55,9 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: Colors.white,
         elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemeConstants.cardRadius)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ThemeConstants.cardRadius),
+        ),
       ),
     );
   }
@@ -85,7 +89,9 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: FlavorConfig.instance.primaryColor,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemeConstants.fieldRadius)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ThemeConstants.fieldRadius),
+          ),
           padding: const EdgeInsets.all(ThemeConstants.defaultPadding),
         ),
       ),
@@ -105,7 +111,9 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: Colors.grey[800],
         elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ThemeConstants.cardRadius)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ThemeConstants.cardRadius),
+        ),
       ),
     );
   }

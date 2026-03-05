@@ -65,7 +65,7 @@ class FlavorConfig {
           flavor: Flavor.prod,
           environment: 'production',
           appName: 'Tech Gadol Assessment',
-          baseUrlKey: 'PROD_BASE_URL',
+          baseUrlKey: 'BASE_URL',
           primaryColor: Color(0xFF1f589c),
           secondaryColor: Color(0xFF21ac4b),
           isProduction: true,

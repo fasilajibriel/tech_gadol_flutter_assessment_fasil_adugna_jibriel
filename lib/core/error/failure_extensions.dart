@@ -6,13 +6,17 @@ extension FailureExtensions on Failure {
       case ApiFailure():
         return _getApiErrorMessage(statusCode, message);
       case AuthFailure():
-        return message.isNotEmpty ? message : 'Authentication failed. Please check your credentials.';
+        return message.isNotEmpty
+            ? message
+            : 'Authentication failed. Please check your credentials.';
       case StorageFailure():
         return 'Storage error: $message';
       case JwtDecodeFailure():
         return 'Session expired. Please login again.';
       case NetworkFailure():
-        return message.isNotEmpty ? message : 'Network error. Please check your internet connection.';
+        return message.isNotEmpty
+            ? message
+            : 'Network error. Please check your internet connection.';
       case PermissionFailure():
         return 'Permission denied: $message';
       case LocationFailure():
@@ -49,7 +53,9 @@ extension FailureExtensions on Failure {
       case 504:
         return 'Gateway timeout. Please try again later.';
       default:
-        return fallbackMessage.isNotEmpty ? fallbackMessage : 'API error: $statusCode';
+        return fallbackMessage.isNotEmpty
+            ? fallbackMessage
+            : 'API error: $statusCode';
     }
   }
 }

@@ -15,8 +15,12 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => getIt<SplashProvider>()..initialize()),
-        ChangeNotifierProvider(create: (_) => getIt<ThemeProvider>()..initialize()),
+        ChangeNotifierProvider(
+          create: (_) => getIt<SplashProvider>()..initialize(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => getIt<ThemeProvider>()..initialize(),
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -24,10 +28,14 @@ class App extends StatelessWidget {
             routerConfig: GoRouterConfig.getRouter(),
             title: FlavorConfig.instance.appName,
             theme: AppTheme.lightTheme.copyWith(
-              textTheme: AppTheme.lightTheme.textTheme.apply(fontFamily: GoogleFonts.poppins().fontFamily),
+              textTheme: AppTheme.lightTheme.textTheme.apply(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              ),
             ),
             darkTheme: AppTheme.darkTheme.copyWith(
-              textTheme: AppTheme.darkTheme.textTheme.apply(fontFamily: GoogleFonts.poppins().fontFamily),
+              textTheme: AppTheme.darkTheme.textTheme.apply(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              ),
             ),
             themeMode: themeProvider.themeMode,
             debugShowCheckedModeBanner: !FlavorConfig.instance.isProduction,

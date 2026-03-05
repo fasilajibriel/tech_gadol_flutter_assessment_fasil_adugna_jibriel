@@ -28,7 +28,11 @@ class LocalStorageManagerImpl implements LocalStorageManager {
       final jsonString = jsonEncode(value);
       return await writeString(key, jsonString);
     } on Exception catch (e) {
-      return Left(DataParsingFailure(message: 'Map serialization failed: ${e.toString()}'));
+      return Left(
+        DataParsingFailure(
+          message: 'Map serialization failed: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -36,7 +40,9 @@ class LocalStorageManagerImpl implements LocalStorageManager {
   FutureResult<String> readString(String key) async {
     try {
       final value = await _storage.read(key: key);
-      return value != null ? Right(value) : Left(StorageFailure(message: 'Key "$key" not found'));
+      return value != null
+          ? Right(value)
+          : Left(StorageFailure(message: 'Key "$key" not found'));
     } catch (e) {
       return Left(StorageFailure(message: 'Read failed: ${e.toString()}'));
     }
@@ -49,7 +55,9 @@ class LocalStorageManagerImpl implements LocalStorageManager {
       try {
         return Right(jsonDecode(jsonString) as Map<String, dynamic>);
       } on Exception catch (e) {
-        return Left(DataParsingFailure(message: 'Map parsing failed: ${e.toString()}'));
+        return Left(
+          DataParsingFailure(message: 'Map parsing failed: ${e.toString()}'),
+        );
       }
     });
   }

@@ -9,11 +9,7 @@ class ApiResponse<T> {
   final T? data;
   final String? message;
 
-  ApiResponse({
-    required this.statusCode,
-    this.data,
-    this.message,
-  });
+  ApiResponse({required this.statusCode, this.data, this.message});
 
   /// Returns `true` if the status code is 2xx.
   bool get isSuccess => statusCode >= 200 && statusCode < 300;

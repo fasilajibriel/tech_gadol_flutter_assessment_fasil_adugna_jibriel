@@ -27,7 +27,9 @@ class ThemeProvider extends ChangeNotifier {
   /// Initialize the theme from storage or system settings
   Future<void> initialize() async {
     // Try to load saved theme from storage
-    final result = await _localStorageManager.readString(StorageConstants.themeModeKey);
+    final result = await _localStorageManager.readString(
+      StorageConstants.themeModeKey,
+    );
 
     result.fold(
       (failure) {
@@ -66,12 +68,17 @@ class ThemeProvider extends ChangeNotifier {
 
     // Save theme mode to storage
     final themeString = _themeModeToString(mode);
-    await _localStorageManager.writeString(StorageConstants.themeModeKey, themeString);
+    await _localStorageManager.writeString(
+      StorageConstants.themeModeKey,
+      themeString,
+    );
   }
 
   /// Toggles between light and dark modes
   Future<void> toggleTheme() async {
-    final newMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    final newMode = _themeMode == ThemeMode.light
+        ? ThemeMode.dark
+        : ThemeMode.light;
     await setThemeMode(newMode);
   }
 
@@ -90,7 +97,9 @@ class ThemeProvider extends ChangeNotifier {
   /// Determines the effective theme mode based on current settings and system brightness
   ThemeMode getEffectiveThemeMode(Brightness systemBrightness) {
     if (_themeMode == ThemeMode.system) {
-      return systemBrightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
+      return systemBrightness == Brightness.dark
+          ? ThemeMode.dark
+          : ThemeMode.light;
     }
     return _themeMode;
   }

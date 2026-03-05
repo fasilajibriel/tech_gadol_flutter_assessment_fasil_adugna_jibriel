@@ -6,9 +6,10 @@ plugins {
 }
 
 android {
-    namespace = "com.techgadol.assessment.flutter.fasilajibriel.tech_gadol_flutter_assessment_fasil_adugna_jibriel"
+    namespace = "com.techgadol.assessment.flutter.fasilajibriel"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    flavorDimensions += "environment"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -20,14 +21,45 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.techgadol.assessment.flutter.fasilajibriel.tech_gadol_flutter_assessment_fasil_adugna_jibriel"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        applicationId = "com.techgadol.assessment.flutter.fasilajibriel"
+        resValue("string", "app_name", "Tech Gadol Assessment")
+        manifestPlaceholders["mainActivityClass"] =
+            "com.techgadol.assessment.flutter.fasilajibriel.MainActivity"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    productFlavors {
+        create("mock") {
+            dimension = "environment"
+            applicationId = "com.techgadol.assessment.flutter.fasilajibriel.mock"
+            resValue("string", "app_name", "Tech Gadol Assessment (Mock)")
+            manifestPlaceholders["mainActivityClass"] =
+                "com.techgadol.assessment.flutter.fasilajibriel.mock.MainActivity"
+        }
+        create("dev") {
+            dimension = "environment"
+            applicationId = "com.techgadol.assessment.flutter.fasilajibriel.dev"
+            resValue("string", "app_name", "Tech Gadol Assessment (Dev)")
+            manifestPlaceholders["mainActivityClass"] =
+                "com.techgadol.assessment.flutter.fasilajibriel.dev.MainActivity"
+        }
+        create("uat") {
+            dimension = "environment"
+            applicationId = "com.techgadol.assessment.flutter.fasilajibriel.uat"
+            resValue("string", "app_name", "Tech Gadol Assessment (UAT)")
+            manifestPlaceholders["mainActivityClass"] =
+                "com.techgadol.assessment.flutter.fasilajibriel.uat.MainActivity"
+        }
+        create("prod") {
+            dimension = "environment"
+            applicationId = "com.techgadol.assessment.flutter.fasilajibriel"
+            resValue("string", "app_name", "Tech Gadol Assessment")
+            manifestPlaceholders["mainActivityClass"] =
+                "com.techgadol.assessment.flutter.fasilajibriel.MainActivity"
+        }
     }
 
     buildTypes {

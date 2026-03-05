@@ -1,0 +1,53 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Mock",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "--verbose",
+                "--flavor",
+                "mock",
+                "--dart-define=FLAVOR=mock"
+            ]
+        },
+        {
+            "name": "Dev",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "--verbose",
+                "--flavor",
+                "dev",
+                "--dart-define=FLAVOR=dev"
+            ]
+        },
+        {
+            "name": "UAT",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "--verbose",
+                "--flavor",
+                "uat",
+                "--dart-define=FLAVOR=uat"
+            ]
+        },
+        {
+            "name": "Prod",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "--verbose",
+                "--flavor",
+                "prod",
+                "--dart-define=FLAVOR=prod"
+            ]
+        }
+    ]
+}

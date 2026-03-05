@@ -10,7 +10,7 @@ Future<void> main() async {
   const flavorName = String.fromEnvironment('FLAVOR', defaultValue: 'prod');
   FlavorConfig.initialize(FlavorConfig.fromName(flavorName));
 
-  await dotenv.load(fileName: '.env_$flavorName');
+  await dotenv.load(fileName: '.env.$flavorName');
   await setupDependencies();
 
   runApp(const App());

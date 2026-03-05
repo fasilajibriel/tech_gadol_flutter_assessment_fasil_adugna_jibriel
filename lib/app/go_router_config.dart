@@ -7,8 +7,14 @@ final GoRouter _appRouter = GoRouter(
   navigatorKey: getIt<NavigationKeyManager>().navigatorKey,
   initialLocation: Routes.splash.path,
   routes: [
-    GoRoute(path: Routes.splash.path, builder: (context, state) => Routes.splash.builder(context, state.extra)),
-    GoRoute(path: Routes.home.path, builder: (context, state) => Routes.home.builder(context, state.extra)),
+    GoRoute(
+      path: Routes.splash.path,
+      builder: (context, state) => Routes.splash.builder(context, state.extra),
+    ),
+    GoRoute(
+      path: Routes.home.path,
+      builder: (context, state) => Routes.home.builder(context, state.extra),
+    ),
   ],
   redirect: (context, state) async {
     return null;

@@ -30,14 +30,20 @@ class MockService extends ApiService {
   }
 
   @override
-  Future<ApiResponse<T>> post<T>({required String endpoint, dynamic data}) async {
+  Future<ApiResponse<T>> post<T>({
+    required String endpoint,
+    dynamic data,
+  }) async {
     final mockData = await _load(_path(endpoint));
     await Future.delayed(const Duration(seconds: 2));
     return ApiResponse<T>(statusCode: 200, data: mockData as T, message: null);
   }
 
   @override
-  Future<ApiResponse<T>> put<T>({required String endpoint, dynamic data}) async {
+  Future<ApiResponse<T>> put<T>({
+    required String endpoint,
+    dynamic data,
+  }) async {
     final mockData = await _load(_path(endpoint));
     await Future.delayed(const Duration(seconds: 2));
     return ApiResponse<T>(statusCode: 200, data: mockData as T, message: null);

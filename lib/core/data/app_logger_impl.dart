@@ -33,7 +33,13 @@ class AppLoggerImpl implements AppLogger {
 
   /// Error-level messages (critical failures requiring attention)
   @override
-  void error(String message, {String? className, String? methodName, Object? error, StackTrace? stackTrace}) {
+  void error(
+    String message, {
+    String? className,
+    String? methodName,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
     // final formatted = _formatMessage(message, className, methodName);
     _logger.log(
       Level.error,
@@ -44,7 +50,12 @@ class AppLoggerImpl implements AppLogger {
     );
   }
 
-  void _log(Level level, String message, String? className, String? methodName) {
+  void _log(
+    Level level,
+    String message,
+    String? className,
+    String? methodName,
+  ) {
     _logger.log(level, _formatMessage(message, className, methodName));
   }
 

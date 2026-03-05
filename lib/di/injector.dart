@@ -25,16 +25,16 @@ Future<void> setupDependencies() async {
   String resolvedBaseUrl;
   switch (flavorConfig.flavor) {
     case Flavor.mock:
-      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'http://local_storage';
+      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
       break;
     case Flavor.dev:
-      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dev-api.example.com/api/v1';
+      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
       break;
     case Flavor.uat:
-      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'http://127.0.0.1:5200/api/v1';
+      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
       break;
     case Flavor.prod:
-      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://api.ezytransportation.com/api/v1';
+      resolvedBaseUrl = dotenv.env[flavorConfig.baseUrlKey] ?? 'https://dummyjson.com/';
       break;
   }
 

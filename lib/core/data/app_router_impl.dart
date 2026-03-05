@@ -12,9 +12,13 @@ class AppRouterImpl implements AppRouter {
   void push<T>(String routePath, {T? args}) {
     _assertKeyReady();
     try {
-      GoRouter.of(_keyManager.navigatorKey.currentContext!).push(routePath, extra: args);
+      GoRouter.of(
+        _keyManager.navigatorKey.currentContext!,
+      ).push(routePath, extra: args);
     } on Exception catch (e) {
-      throw NavigationFailure(message: 'Push navigation failed: ${e.toString()}');
+      throw NavigationFailure(
+        message: 'Push navigation failed: ${e.toString()}',
+      );
     }
   }
 
@@ -22,7 +26,9 @@ class AppRouterImpl implements AppRouter {
   void go<T>(String routePath, {T? args}) {
     _assertKeyReady();
     try {
-      GoRouter.of(_keyManager.navigatorKey.currentContext!).go(routePath, extra: args);
+      GoRouter.of(
+        _keyManager.navigatorKey.currentContext!,
+      ).go(routePath, extra: args);
     } on Exception catch (e) {
       throw NavigationFailure(message: 'Go navigation failed: ${e.toString()}');
     }
@@ -34,14 +40,17 @@ class AppRouterImpl implements AppRouter {
     try {
       GoRouter.of(_keyManager.navigatorKey.currentContext!).pop();
     } on Exception catch (e) {
-      throw NavigationFailure(message: 'Pop navigation failed: ${e.toString()}');
+      throw NavigationFailure(
+        message: 'Pop navigation failed: ${e.toString()}',
+      );
     }
   }
 
   void _assertKeyReady() {
     if (_keyManager.navigatorKey.currentContext == null) {
       throw const NavigationFailure(
-        message: 'Navigation key not initialized. Ensure RouterKeyManager is properly set up.',
+        message:
+            'Navigation key not initialized. Ensure RouterKeyManager is properly set up.',
       );
     }
   }

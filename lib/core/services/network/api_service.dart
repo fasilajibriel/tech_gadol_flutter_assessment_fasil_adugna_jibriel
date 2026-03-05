@@ -13,9 +13,7 @@ class ApiService {
   }
 
   void addInterceptors() {
-    dio.interceptors.addAll([
-      LoggingInterceptor(appLogger: appLogger),
-    ]);
+    dio.interceptors.addAll([LoggingInterceptor(appLogger: appLogger)]);
   }
 
   Future<ApiResponse<T>> get<T>({
@@ -54,9 +52,7 @@ class ApiService {
     }
   }
 
-  Future<ApiResponse<T>> delete<T>({
-    required String endpoint,
-  }) async {
+  Future<ApiResponse<T>> delete<T>({required String endpoint}) async {
     try {
       final response = await dio.delete(endpoint);
       return _parseResponse<T>(response);
@@ -78,7 +74,10 @@ class ApiService {
     if (response != null) {
       final statusCode = response.statusCode ?? 500;
       return ApiFailure(
-        message: _resolveResponseMessage(response.data) ?? response.statusMessage ?? 'Request failed',
+        message:
+            _resolveResponseMessage(response.data) ??
+            response.statusMessage ??
+            'Request failed',
         statusCode: statusCode,
       );
     }
@@ -97,9 +96,14 @@ class ApiService {
       case DioExceptionType.cancel:
         return const UnknownFailure(message: 'Request was cancelled.');
       case DioExceptionType.badResponse:
-        return const ApiFailure(message: 'Unexpected server response.', statusCode: 500);
+        return const ApiFailure(
+          message: 'Unexpected server response.',
+          statusCode: 500,
+        );
       case DioExceptionType.unknown:
-        return UnknownFailure(message: error.message ?? 'Unexpected network error.');
+        return UnknownFailure(
+          message: error.message ?? 'Unexpected network error.',
+        );
     }
   }
 
