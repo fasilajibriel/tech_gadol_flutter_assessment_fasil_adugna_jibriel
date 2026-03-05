@@ -5,6 +5,8 @@ import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/domain/usecases/get_products_use_case.dart';
 
 class HomeProvider with ChangeNotifier {
+  static const String allCategory = 'All';
+
   HomeProvider({required GetProductsUseCase getProductsUseCase})
     : _getProductsUseCase = getProductsUseCase;
 
@@ -18,6 +20,8 @@ class HomeProvider with ChangeNotifier {
   String? _errorMessage;
   ProductsResponseModel? _productsResponseModel;
   List<Product> _products = <Product>[];
+  String _searchQuery = '';
+  String _selectedCategory = allCategory;
 
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
@@ -25,10 +29,46 @@ class HomeProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   int get limit => _limit;
   int get page => _page;
+  String get searchQuery => _searchQuery;
+  String get selectedCategory => _selectedCategory;
+  List<String> get categories {
+    final sortedCategories =
+        _products
+            .map((product) => product.category?.trim() ?? '')
+            .where((category) => category.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+    return <String>[allCategory, ...sortedCategories];
+  }
+
+  List<Product> get filteredProducts {
+    final query = _searchQuery.trim().toLowerCase();
+    return _products.where((product) {
+      final title = (product.title ?? '').toLowerCase();
+      final category = product.category ?? '';
+
+      final matchesSearch = query.isEmpty || title.contains(query);
+      final matchesCategory =
+          _selectedCategory == allCategory || category == _selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    }).toList();
+  }
 
   // Casted and stored data from /products endpoint for UI consumption.
   ProductsResponseModel? get productsResponseModel => _productsResponseModel;
   List<Product> get products => _products;
+
+  void setSearchQuery(String value) {
+    _searchQuery = value;
+    notifyListeners();
+  }
+
+  void setSelectedCategory(String value) {
+    _selectedCategory = value;
+    notifyListeners();
+  }
 
   Future<void> loadInitialProducts({int limit = 10}) async {
     _limit = limit;
@@ -77,6 +117,11 @@ class HomeProvider with ChangeNotifier {
         _products = isInitialLoad
             ? fetchedProducts
             : <Product>[..._products, ...fetchedProducts];
+
+        if (_selectedCategory != allCategory &&
+            !categories.contains(_selectedCategory)) {
+          _selectedCategory = allCategory;
+        }
 
         final total = responseModel.total ?? _products.length;
         _hasMore = _products.length < total && fetchedProducts.isNotEmpty;

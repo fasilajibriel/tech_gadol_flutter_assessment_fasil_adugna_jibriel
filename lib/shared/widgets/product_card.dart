@@ -1,127 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/constants/theme_constants.dart';
+import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/core/presentation/providers/theme_provider.dart';
 import 'package:tech_gadol_flutter_assessment_fasil_adugna_jibriel/features/home/data/models/products_response_model/product.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
-  final VoidCallback onTap;
 
-  const ProductCard({super.key, required this.product, required this.onTap});
+  const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: context.read<ThemeProvider>().themeMode == ThemeMode.dark
+            ? ThemeConstants.darkCardBgColor
+            : ThemeConstants.lightCardBgColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
           children: [
-            _buildImageHeader(),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: _buildProductDetails(),
-            ),
+            // 1. Image in Rounded Container
+            _buildImage(context),
+            const SizedBox(width: 16),
+            // 2. Product Details
+            Expanded(child: _buildDetails(context)),
+            // 3. Quantity
+            // _buildQuantity(),
           ],
         ),
       ),
     );
   }
 
-  // Sub-widgets for better readability
-  Widget _buildImageHeader() {
-    return Stack(
+  // Sub-widgets for layout clarity and performance
+
+  Widget _buildImage(BuildContext context) {
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        color: context.read<ThemeProvider>().themeMode == ThemeMode.dark
+            ? ThemeConstants.darkCardBgColor
+            : ThemeConstants.lightCardBgColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.network(
+        product.thumbnail ?? "",
+        fit: BoxFit.contain, // Best for isolating products
+        errorBuilder: (ctx, _, __) => const Icon(Icons.shopping_bag_outlined),
+      ),
+    );
+  }
+
+  Widget _buildDetails(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AspectRatio(
-          aspectRatio: 16 / 9,
-          child: Image.network(
-            product.thumbnail ?? "",
-            fit: BoxFit.cover,
-            // Always handle loading/error states for production-grade UI
-            errorBuilder: (context, error, stackTrace) =>
-                const Center(child: Icon(Icons.broken_image)),
-          ),
+        // Title
+        Text(
+          product.title ?? "",
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        if ((product.discountPercentage ?? 0) > 0)
-          Positioned(
-            top: 8,
-            left: 8,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.redAccent,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '-${product.discountPercentage?.toStringAsFixed(0)}%',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
+        const SizedBox(height: 4),
+        // Simplified Info (Brand only for compact view)
+        Text("By: ${product.brand}", style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+        const Spacer(),
+        // Simplified Price (Mapped directly from JSON price)
+        Text(
+          '\$${product.price?.toStringAsFixed(2)}',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
 
-  Widget _buildProductDetails() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          product.brand?.toUpperCase() ?? "",
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.grey[600],
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          product.title ?? "",
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '\$${(product.price ?? 0).toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Colors.green,
-              ),
-            ),
-            Row(
-              children: [
-                const Icon(Icons.star, color: Colors.amber, size: 16),
-                const SizedBox(width: 2),
-                Text(
-                  (product.rating ?? 0).toStringAsFixed(1),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          "${product.availabilityStatus}",
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: (product.stock ?? 0) > 0 ? Colors.blueGrey : Colors.red,
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildQuantity() {
+  //   return Align(
+  //     alignment: Alignment.center,
+  //     child: Padding(
+  //       padding: const EdgeInsets.only(left: 12.0),
+  //       child: Text('x$quantity', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+  //     ),
+  //   );
+  // }
 }
