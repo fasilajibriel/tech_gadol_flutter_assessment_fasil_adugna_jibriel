@@ -26,7 +26,7 @@ class SplashPage extends StatelessWidget {
                     message: 'Preparing application...',
                   );
                 case ProviderViewState.loading:
-                  return LoadingStateWidget(
+                  return const LoadingStateWidget(
                     message: 'Checking internet connection...',
                   );
                 case ProviderViewState.error:
@@ -54,7 +54,7 @@ class SplashPage extends StatelessWidget {
                       const SizedBox(height: ThemeConstants.defaultPadding),
                       Text(
                         FlavorConfig.instance.appName,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
